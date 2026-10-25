@@ -6,6 +6,12 @@ All notable changes are recorded here using Semantic Versioning. / Los cambios r
 
 Changes in main are not automatically HACS releases. / Los cambios en main no se publican automáticamente en HACS.
 
+## [0.3.5] - 2026-10-25
+
+### Fixed / Corregido
+- Animate all four window panes sliding downward when the shared cover reports open; add a contrasting window frame. / Anima los cuatro cristales bajando cuando el sensor general indica abierto; añade marcos visibles.
+- External GLB articulation and separate individual window states remain unsupported. / La articulación de GLB externos y los estados individuales de cada ventanilla siguen pendientes.
+
 ## [0.3.4] - 2026-10-25
 
 ### Fixed / Corregido
