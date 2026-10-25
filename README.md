@@ -69,16 +69,16 @@ MIT for source code. Vehicle models are **not** licensed by this repository / MI
 
 ## Releasing / Publicar versiones
 
-Releases are created manually to keep experimental commits separate from HACS releases.
-Las versiones se publican manualmente para no distribuir automáticamente cada cambio de desarrollo.
+**Automatic / Automático:** Update the version in `dist/xpeng-3d-card.js`, then push a new semantic-version Git tag, such as `v0.3.2`. GitHub Actions validates the version, builds `xpeng-3d-card.js` and publishes the corresponding GitHub Release for HACS. The release is marked as a preview (prerelease). / Actualiza la versión del archivo fuente y publica una nueva etiqueta Git, como `v0.3.2`. GitHub Actions valida el número, genera el archivo de HACS y publica automáticamente la Release preliminar.
 
-1. Go to [Actions → Publish HACS release](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml).
-2. Click **Run workflow / Ejecutar flujo de trabajo** on `main`.
-3. Enter a new version, for example `v0.2.0`; keep **prerelease** enabled while experimental.
-4. The workflow validates the JavaScript and creates a GitHub Release containing `xpeng-3d-card.js` as a HACS-downloadable asset.
-5. In HACS, refresh the repository information to detect the release / Actualiza la información del repositorio en HACS.
+```bash
+git tag v0.3.2
+git push origin v0.3.2
+```
 
-**Note / Nota:** A workflow file being committed does **not** publish a version by itself.
+**Manual fallback / Alternativa manual:** [Actions → Publish HACS release](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml) → **Run workflow**. / Ejecuta el flujo manualmente solo cuando sea necesario.
+
+Changes to `main` alone never publish a HACS release. / Los cambios en `main` no generan por sí solos una versión en HACS.
 
 ## Vehicle profiles / Perfiles de vehículos (v0.3.0-dev)
 
