@@ -6,6 +6,11 @@ All notable changes are recorded here using Semantic Versioning. / Los cambios r
 
 Changes in main are not automatically HACS releases. / Los cambios en main no se publican automáticamente en HACS.
 
+## [0.3.3] - 2026-10-25
+
+### Fixed / Corregido
+- Move door panels outward during animated opening so the visible body geometry does not obscure them. / Desplaza las puertas hacia fuera durante la apertura para evitar que la carrocería las oculte.
+
 ## [0.3.2] - 2026-10-25
 
 ### Fixed / Corregido
