@@ -31,6 +31,8 @@ jobs:
           [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
           test -s dist/xpeng-3d-card.js
           node --check dist/xpeng-3d-card.js
+          VERSION="v${VERSION#v}"
+          grep -Fq "XPeng 3D Card — ${VERSION#v}" dist/xpeng-3d-card.js || { echo "Source version differs from release version"; exit 1; }
       - name: Build distributable at repository root for HACS
         run: cp dist/xpeng-3d-card.js xpeng-3d-card.js
       - name: Create tag and GitHub Release
@@ -48,16 +50,14 @@ jobs:
           git push origin "$VERSION"
           cat > release-notes.md <<'EOF'
           ## English
-          - Interactive XPeng-themed 3D SUV prototype with 360° rotation and customizable body color.
-          - Live visual states for four doors, trunk and hood (procedural viewer).
-          - Battery, charging and lock-state indicators.
-          - Developer preview: the geometry is not yet an accurate XPeng G6 model.
+          - See CHANGELOG.md for changes in this version.
+          - Built-in viewer is an early functional 3D prototype, not a manufacturer-accurate G6 model.
+          - Read-only vehicle visualization; no control commands are sent.
 
           ## Español
-          - Prototipo 3D de SUV inspirado en XPeng, con giro 360° y color personalizable.
-          - Visualización de cuatro puertas, maletero y capó mediante sensores (visor provisional).
-          - Indicadores de batería, carga y bloqueo.
-          - Versión preliminar: todavía no es una reproducción fiel del XPeng G6.
+          - Consulta CHANGELOG.md para conocer los cambios de esta versión.
+          - El visor incluido es un prototipo 3D funcional, no una reproducción exacta del G6.
+          - Visualización del coche en solo lectura; no se envían órdenes al vehículo.
           EOF
           if [ "$PRE" = "true" ]; then
             gh release create "$VERSION" xpeng-3d-card.js --title "$VERSION" --notes-file release-notes.md --prerelease --verify-tag
