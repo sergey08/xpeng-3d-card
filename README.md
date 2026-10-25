@@ -69,16 +69,13 @@ MIT for source code. Vehicle models are **not** licensed by this repository / MI
 
 ## Releasing / Publicar versiones
 
-**Automatic / Automático:** Update the version in `dist/xpeng-3d-card.js`, then push a new semantic-version Git tag, such as `v0.3.2`. GitHub Actions validates the version, builds `xpeng-3d-card.js` and publishes the corresponding GitHub Release for HACS. The release is marked as a preview (prerelease). / Actualiza la versión del archivo fuente y publica una nueva etiqueta Git, como `v0.3.2`. GitHub Actions valida el número, genera el archivo de HACS y publica automáticamente la Release preliminar.
+**Automatic / Automático:** When a commit reaches `main`, GitHub Actions reads the source version in `dist/xpeng-3d-card.js`. If that version does not yet have a GitHub Release, it validates the code, creates the `vX.Y.Z` tag and publishes the HACS asset. Existing versions are skipped. / Al subir cambios a `main`, GitHub Actions lee la versión del archivo fuente. Si todavía no existe su Release, valida el código, crea la etiqueta y publica el archivo para HACS. Las versiones ya publicadas se omiten.
 
-```bash
-git tag v0.3.2
-git push origin v0.3.2
-```
+For a new release, increment the source version and update `CHANGELOG.md` before committing. / Para publicar, incrementa la versión del código y actualiza `CHANGELOG.md` antes de confirmar cambios.
 
-**Manual fallback / Alternativa manual:** [Actions → Publish HACS release](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml) → **Run workflow**. / Ejecuta el flujo manualmente solo cuando sea necesario.
+The manual [Run workflow](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml) action is kept as a fallback. Tag pushes are also supported. / Se conserva la ejecución manual como alternativa y también se admiten etiquetas Git.
 
-Changes to `main` alone never publish a HACS release. / Los cambios en `main` no generan por sí solos una versión en HACS.
+**Important / Importante:** All automated releases are marked **prerelease** while the model is under development. / Todas las publicaciones automáticas se marcan como **preliminares** durante el desarrollo.
 
 ## Vehicle profiles / Perfiles de vehículos (v0.3.0-dev)
 
