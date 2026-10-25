@@ -6,6 +6,10 @@ Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, co
 
 > **Developer preview / Vista preliminar:** The 3D XPeng G6 model is **not included**. To see the vehicle and animate parts you must provide a suitably licensed GLB with appropriately named meshes/animations. / No se incluye el modelo 3D del G6. Necesitas aportar un archivo GLB con licencia adecuada y piezas/animaciones compatibles.
 
+[![Add to HACS / Añadir a HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sergey08&repository=xpeng-3d-card&category=plugin)
+
+**One-click HACS repository link / Enlace para añadir el repositorio directamente a HACS.** HACS must be installed / HACS debe estar instalado.
+
 ## Installation / Instalación
 
 1. HACS → Custom repositories / Repositorios personalizados → `https://github.com/sergey08/xpeng-3d-card` → **Dashboard**.
