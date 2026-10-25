@@ -1,6 +1,6 @@
 /* XPeng 3D Card — 0.3.0-dev2, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
- model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025',
+ model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025', model_urls:{},
  entities:{
  door_fl:'binary_sensor.driver_door_xpeng_135818',door_fr:'binary_sensor.passenger_door_xpeng_135818',
  door_rl:'binary_sensor.rear_left_door_xpeng_135818',door_rr:'binary_sensor.rear_right_door_xpeng_135818',
@@ -45,10 +45,10 @@ class XPeng3DCard extends HTMLElement {
  <span class="hint">Drag to rotate / Arrastra para girar</span></div>
  <div class="metrics"><span id="battery"></span><span id="charge"></span><span id="power"></span></div>
  <div class="badges" id="badges"></div><div id="message"></div></ha-card>`;
-  const viewer=this.shadowRoot.querySelector('#viewer');if(c.model && c.model!==DEFAULTS.model){viewer.src=String(c.model);}else{viewer.style.display='none';this.startProcedural();}
+  const viewer=this.shadowRoot.querySelector('#viewer');const modelUrl=c.model_urls?.[c.vehicle_model]||(c.model!==DEFAULTS.model?c.model:null);if(modelUrl){viewer.src=String(modelUrl);}else{viewer.style.display='none';this.startProcedural();}
   viewer.addEventListener('load',()=>{this.paint();this.animate();});
   viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Supply your own model.'));
-  if(c.model && c.model!==DEFAULTS.model) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
+  if(modelUrl) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
   const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
  }
