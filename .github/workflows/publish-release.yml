@@ -46,7 +46,7 @@ jobs:
       - name: Create tag if needed and publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ github.event_name == 'push' && github.ref_name || inputs.version }}
           PRE: ${{ github.event_name == 'push' && 'true' || inputs.prerelease }}
         run: |
           VERSION="v${VERSION#v}"
