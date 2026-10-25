@@ -94,3 +94,23 @@ model_urls:
 ```
 
 The path above is only an **example**: no GLB is bundled or automatically downloaded. External GLB files currently support rotation and color-changing if paint materials are appropriately named; door/trunk articulation remains available only in the procedural prototype. / La ruta es un **ejemplo**: no se incluye ni descarga ningún GLB. Los archivos externos permiten giro y cambio de color si los materiales están identificados; la articulación de puertas y maletero sigue limitada al prototipo integrado.
+
+
+## Live 3D states / Estados 3D en tiempo real (development / desarrollo)
+
+The built-in procedural viewer listens to these entity keys / El visor geométrico incluido utiliza estas entidades:
+
+| Feature / Función | Entity key / Clave |
+|---|---|
+| Four doors / Cuatro puertas | `door_fl`, `door_fr`, `door_rl`, `door_rr` |
+| Tailgate and bonnet / Portón y capó | `trunk`, `bonnet` |
+| Windows / Ventanillas | `windows` |
+| Charge flap / Tapa de carga | `charge_port` |
+| Visible charging cable / Manguera visible | `plugged` |
+| Cable illuminated when actively charging / Cable iluminado cargando | `charge_power`, `charging` |
+
+**Limitations / Limitaciones:** The common windows entity reports one aggregate state, so all four panes are shown or hidden together; this does not mean every individual window has opened. The cable is a symbolic visual, not an exact representation of the V2C Trydan. / El estado de ventanillas es conjunto, así que las cuatro se muestran u ocultan juntas. El cable es una representación visual simbólica.
+
+This is a read-only visualization; no vehicle commands are issued. External GLBs still need articulated-node support. / Es una visualización de solo lectura; no envía órdenes al coche. Los GLB externos aún necesitan compatibilidad con articulaciones.
+
+The changes above are currently on `main`; a tagged version has not yet been published. / Estos cambios están en `main`; todavía no se ha publicado una versión etiquetada.
