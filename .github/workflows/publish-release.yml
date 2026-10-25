@@ -65,7 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          PRE: ${{ github.event_name == 'push' && 'true' || inputs.prerelease }}
+          PRE: ${{ github.event_name == 'push' && 'false' || inputs.prerelease }}
         run: |
           VERSION="v${VERSION#v}"
           if gh release view "$VERSION" >/dev/null 2>&1; then
