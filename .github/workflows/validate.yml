@@ -1,0 +1,12 @@
+name: Validate dashboard card
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check dist/xpeng-3d-card.js
+      - run: node -e "const x=require('./hacs.json'); if(x.filename!=='xpeng-3d-card.js')process.exit(1)"
