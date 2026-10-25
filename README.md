@@ -80,3 +80,17 @@ Choose in the visual card editor or YAML with `vehicle_model: g6_2025` / Selecci
 Future models will be added as profiles when suitable licensed articulated geometry is available / Se añadirán más modelos cuando existan geometrías articuladas con licencias adecuadas.
 
 **This development commit is not a tagged HACS release yet / Este cambio de desarrollo aún no es una versión etiquetada de HACS.**
+
+## Optional 3D model per vehicle / Modelo 3D opcional por vehículo
+
+You can assign a licensed GLB separately to each car profile, while other profiles continue using the built-in simplified prototype. / Puedes asignar un GLB con licencia adecuada a cada perfil; los demás siguen usando el prototipo simplificado.
+
+```yaml
+type: custom:xpeng-3d-card
+vehicle_model: g6_2025
+color: "#73787d"
+model_urls:
+  g6_2025: /local/xpeng-3d-card/g6-2025.glb
+```
+
+The path above is only an **example**: no GLB is bundled or automatically downloaded. External GLB files currently support rotation and color-changing if paint materials are appropriately named; door/trunk articulation remains available only in the procedural prototype. / La ruta es un **ejemplo**: no se incluye ni descarga ningún GLB. Los archivos externos permiten giro y cambio de color si los materiales están identificados; la articulación de puertas y maletero sigue limitada al prototipo integrado.
