@@ -6,6 +6,11 @@ All notable changes are recorded here using Semantic Versioning. / Los cambios r
 
 Changes in main are not automatically HACS releases. / Los cambios en main no se publican automáticamente en HACS.
 
+## [0.3.4] - 2026-10-25
+
+### Fixed / Corregido
+- Publish standard GitHub Releases so HACS detects semantic version updates instead of development commit hashes. / Publicar versiones normales para que HACS detecte números de versión y no hashes de desarrollo.
+
 ## [0.3.3] - 2026-10-25
 
 ### Fixed / Corregido
