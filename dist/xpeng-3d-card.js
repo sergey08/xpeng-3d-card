@@ -1,4 +1,4 @@
-/* XPeng 3D Card — 0.3.0-dev2, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
+/* XPeng 3D Card — 0.3.0-dev3, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
  model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025', model_urls:{},
  entities:{
@@ -47,7 +47,7 @@ class XPeng3DCard extends HTMLElement {
  <div class="badges" id="badges"></div><div id="message"></div></ha-card>`;
   const viewer=this.shadowRoot.querySelector('#viewer');const modelUrl=c.model_urls?.[c.vehicle_model]||(c.model!==DEFAULTS.model?c.model:null);if(modelUrl){viewer.src=String(modelUrl);}else{viewer.style.display='none';this.startProcedural();}
   viewer.addEventListener('load',()=>{this.paint();this.animate();});
-  viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Supply your own model.'));
+  viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Check the URL and file license.'));
   if(modelUrl) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
   const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
@@ -125,6 +125,7 @@ class XPeng3DCard extends HTMLElement {
    renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;az+=(e.clientX-drag[0])*.008;el=Math.max(-.05,Math.min(.95,el+(e.clientY-drag[1])*.005));drag=[e.clientX,e.clientY];});
    renderer.domElement.addEventListener('pointerup',()=>drag=null);
    renderer.domElement.addEventListener('pointercancel',()=>drag=null);
+   renderer.domElement.addEventListener('lostpointercapture',()=>drag=null);
    renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(4,Math.min(15,zoom+e.deltaY*.008));},{passive:false});
    this._resizeObserver=new ResizeObserver(()=>{if(!this._renderer)return;let w=stage.clientWidth||340;camera.aspect=w/height;camera.updateProjectionMatrix();renderer.setSize(w,height,false);});this._resizeObserver.observe(stage);
    const step=()=>{if(this._disposed||token!==this._renderToken||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);this.tickProcedural();renderer.render(scene,camera);requestAnimationFrame(step);};step();
