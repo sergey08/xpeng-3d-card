@@ -53,7 +53,7 @@ class XPeng3DCard extends HTMLElement {
   const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
  }
 
- cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;}
+ cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;this._portOpenMaterial?.dispose();this._portOpenMaterial=null;}
  disconnectedCallback(){this.cleanup();}
  async startProcedural(){
   this._disposed=false;const token=this._renderToken;
@@ -126,20 +126,29 @@ class XPeng3DCard extends HTMLElement {
    renderer.domElement.addEventListener('pointercancel',()=>drag=null);
    renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(4,Math.min(15,zoom+e.deltaY*.008));},{passive:false});
    this._resizeObserver=new ResizeObserver(()=>{if(!this._renderer)return;let w=stage.clientWidth||340;camera.aspect=w/height;camera.updateProjectionMatrix();renderer.setSize(w,height,false);});this._resizeObserver.observe(stage);
-   const step=()=>{if(this._disposed||token!==this._renderToken||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);renderer.render(scene,camera);requestAnimationFrame(step);};step();
+   const step=()=>{if(this._disposed||token!==this._renderToken||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);this.tickProcedural();renderer.render(scene,camera);requestAnimationFrame(step);};step();
    this.message('G6 '+generation+' concept / Prototipo 3D estilizado, NO es un modelo exacto XPeng.');
   }catch(err){this.message('3D rendering unavailable / Error del visor 3D: '+String(err.message||err));}
  }
  syncProcedural(){
   if(!this._hinges)return;
   for(const [key,h] of Object.entries(this._hinges)){
-   const v=this.opened(key)?1:0;
-   if(key==='trunk')h.group.rotation.z=v*.85;
-   else if(key==='bonnet')h.group.rotation.z=-v*.55;
-   else h.group.rotation.y=(h.side===-1?1:-1)*v*1.10;
+   const isOpen=this.opened(key);
+   h.target=key==='trunk'?(isOpen?.85:0):key==='bonnet'?(isOpen?-.55:0):(isOpen?(h.side===-1?1:-1)*1.10:0);
   }
   if(this._paint)this._paint.color.set(safeColor(this.cfg.color));
-  if(this._port){this._port.material=this.opened('charge_port')?this._portOpenMaterial||(this._portOpenMaterial=new this._port.material.constructor({color:0x161a20})):this._paint;}
+  if(this._port){
+   this._port.material=this.opened('charge_port')?(this._portOpenMaterial||(this._portOpenMaterial=this._paint.clone(),this._portOpenMaterial.color.set(0x161a20))):this._paint;
+  }
+ }
+ tickProcedural(){
+  if(!this._hinges)return;
+  for(const [key,h] of Object.entries(this._hinges)){
+   const axis=(key==='trunk'||key==='bonnet')?'z':'y';
+   const current=h.group.rotation[axis],target=h.target??0;
+   if(Math.abs(target-current)>0.0005)h.group.rotation[axis]=current+(target-current)*.12;
+   else h.group.rotation[axis]=target;
+  }
  }
 
  message(s){const e=this.shadowRoot?.getElementById('message');if(e)e.textContent=s;}
