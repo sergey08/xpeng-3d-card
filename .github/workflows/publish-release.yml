@@ -2,6 +2,8 @@ name: Publish HACS release / Publicar versión HACS
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v[0-9]*.[0-9]*.[0-9]*'
   workflow_dispatch:
@@ -32,9 +34,25 @@ jobs:
         with:
           ref: ${{ github.event_name == 'push' && github.ref_name || 'main' }}
           fetch-depth: 0
+      - name: Resolve release version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="v${INPUT_VERSION#v}"
+          elif [ "$REF_TYPE" = "tag" ]; then
+            VERSION="$REF_NAME"
+          else
+            VERSION=$(sed -n '1s/.*XPeng 3D Card — \([0-9][0-9.]*\).*/v\1/p' dist/xpeng-3d-card.js)
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Validate version
         env:
-          VERSION: ${{ github.event_name == 'push' && github.ref_name || inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
           test -s dist/xpeng-3d-card.js
@@ -46,7 +64,7 @@ jobs:
       - name: Create tag if needed and publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ github.event_name == 'push' && github.ref_name || inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
           PRE: ${{ github.event_name == 'push' && 'true' || inputs.prerelease }}
         run: |
           VERSION="v${VERSION#v}"
