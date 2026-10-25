@@ -28,7 +28,7 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
+          [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
           test -s dist/xpeng-3d-card.js
           node --check dist/xpeng-3d-card.js
       - name: Build distributable at repository root for HACS
@@ -39,6 +39,7 @@ jobs:
           VERSION: ${{ inputs.version }}
           PRE: ${{ inputs.prerelease }}
         run: |
+          VERSION="v${VERSION#v}"
           if gh release view "$VERSION" >/dev/null 2>&1 || git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
             echo "Version already exists / La versión ya existe"
             exit 1
