@@ -4,7 +4,7 @@ A custom Lovelace **HACS Dashboard** card for XPeng vehicles, with a 3D GLB view
 
 Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, color de carrocería configurable y estados en tiempo real de Home Assistant.
 
-> **0.3.1 Developer preview / Vista preliminar:** A rotatable, recolorable **procedural SUV prototype** is now included, with door/trunk/bonnet state articulation. **This is NOT an exact XPeng G6 model**. An accurate articulated G6 GLB is still a future goal. / Incluye un **prototipo de SUV 3D**, giratorio y recoloreable, con puertas/maletero/capó vinculados a sensores. **No es un modelo exacto del XPeng G6**.
+> **0.3.4 Developer preview / Vista preliminar:** A rotatable, recolorable **procedural SUV prototype** is now included, with door/trunk/bonnet state articulation. **This is NOT an exact XPeng G6 model**. An accurate articulated G6 GLB is still a future goal. / Incluye un **prototipo de SUV 3D**, giratorio y recoloreable, con puertas/maletero/capó vinculados a sensores. **No es un modelo exacto del XPeng G6**.
 
 [![Add to HACS / Añadir a HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sergey08&repository=xpeng-3d-card&category=plugin)
 
@@ -39,6 +39,7 @@ entities:
 
 ## Versions / Versiones
 
+- `v0.3.4` — stable GitHub release channel for HACS version tracking; includes the latest door-animation changes. / Canal de versiones normales para HACS e incluye los últimos cambios de las puertas.
 - `v0.3.1` — fixes charging flap/cable placement on the opposite side; displays version in the card. / Corrige el lado de la tapa y del cable de carga; muestra la versión en la tarjeta.
 - `v0.3.0` — live door, boot, bonnet, windows, charge port and plug-in cable on the built-in procedural model. / Estados en vivo de puertas, maletero, capó, ventanas, toma de carga y manguera.
 - `v0.2.0` — initial interactive 3D preview. / Primer prototipo 3D interactivo.
@@ -75,7 +76,7 @@ For a new release, increment the source version and update `CHANGELOG.md` before
 
 The manual [Run workflow](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml) action is kept as a fallback. Tag pushes are also supported. / Se conserva la ejecución manual como alternativa y también se admiten etiquetas Git.
 
-**Important / Importante:** All automated releases are marked **prerelease** while the model is under development. / Todas las publicaciones automáticas se marcan como **preliminares** durante el desarrollo.
+**Important / Importante:** Automated main releases are regular GitHub Releases so HACS can reliably track version numbers; the 3D model itself is still an experimental preview. / Las publicaciones automáticas son Releases normales para que HACS reconozca las versiones; el modelo 3D sigue siendo experimental.
 
 ## Vehicle profiles / Perfiles de vehículos (v0.3.0-dev)
 
