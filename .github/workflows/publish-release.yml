@@ -1,6 +1,9 @@
 name: Publish HACS release / Publicar versión HACS
 
 on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
   workflow_dispatch:
     inputs:
       version:
@@ -16,17 +19,22 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: xpeng-release-${{ github.event.inputs.version || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout tagged source or main
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'push' && github.ref_name || 'main' }}
+          fetch-depth: 0
       - name: Validate version
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ github.event_name == 'push' && github.ref_name || inputs.version }}
         run: |
           [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
           test -s dist/xpeng-3d-card.js
@@ -35,19 +43,21 @@ jobs:
           grep -Fq "XPeng 3D Card — ${VERSION#v}" dist/xpeng-3d-card.js || { echo "Source version differs from release version"; exit 1; }
       - name: Build distributable at repository root for HACS
         run: cp dist/xpeng-3d-card.js xpeng-3d-card.js
-      - name: Create tag and GitHub Release
+      - name: Create tag if needed and publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
-          PRE: ${{ inputs.prerelease }}
+          PRE: ${{ github.event_name == 'push' && 'true' || inputs.prerelease }}
         run: |
           VERSION="v${VERSION#v}"
-          if gh release view "$VERSION" >/dev/null 2>&1 || git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
-            echo "Version already exists / La versión ya existe"
-            exit 1
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release already exists / La versión ya está publicada"
+            exit 0
           fi
-          git tag "$VERSION"
-          git push origin "$VERSION"
+          if ! git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            git tag "$VERSION"
+            git push origin "$VERSION"
+          fi
           cat > release-notes.md <<'EOF'
           ## English
           - See CHANGELOG.md for changes in this version.
