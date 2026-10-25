@@ -4,7 +4,7 @@ A custom Lovelace **HACS Dashboard** card for XPeng vehicles, with a 3D GLB view
 
 Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, color de carrocería configurable y estados en tiempo real de Home Assistant.
 
-> **Developer preview / Vista preliminar:** The 3D XPeng G6 model is **not included**. To see the vehicle and animate parts you must provide a suitably licensed GLB with appropriately named meshes/animations. / No se incluye el modelo 3D del G6. Necesitas aportar un archivo GLB con licencia adecuada y piezas/animaciones compatibles.
+> **0.2.0 Developer preview / Vista preliminar:** A rotatable, recolorable **procedural SUV prototype** is now included, with door/trunk/bonnet state articulation. **This is NOT an exact XPeng G6 model**. An accurate articulated G6 GLB is still a future goal. / Incluye un **prototipo de SUV 3D**, giratorio y recoloreable, con puertas/maletero/capó vinculados a sensores. **No es un modelo exacto del XPeng G6**.
 
 [![Add to HACS / Añadir a HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sergey08&repository=xpeng-3d-card&category=plugin)
 
@@ -14,12 +14,11 @@ Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, co
 
 1. HACS → Custom repositories / Repositorios personalizados → `https://github.com/sergey08/xpeng-3d-card` → **Dashboard**.
 2. Install / Instalar y actualizar el navegador.
-3. Put a licensed GLB at `/config/www/xpeng-3d-card/xpeng-g6.glb` (served as `/local/xpeng-3d-card/xpeng-g6.glb`).
+3. No GLB is required for the built-in procedural prototype / No hace falta GLB para el prototipo incluido. For an external model, set the `model` option / Para un modelo externo usa `model`.
 4. Add a manual Lovelace card / Añade una tarjeta manual:
 
 ```yaml
 type: custom:xpeng-3d-card
-model: /local/xpeng-3d-card/xpeng-g6.glb
 color: "#73787d"
 height: 380
 entities:
@@ -42,8 +41,9 @@ entities:
 - Configurable color, 3D orbit and zoom / color, giro y zoom.
 - Door/trunk/bonnet/charging indicators and entity mapping / indicadores de puertas, maletero, capó y carga.
 - Visual editor / editor visual.
-- GLB animation support is **experimental** and requires suitable named animation clips. Not a replica of the XPeng app yet. / Animaciones GLB **experimentales**; requiere clips de animación compatibles. Todavía no reproduce la app XPeng.
-- Uses Google's model-viewer CDN at runtime; internet access is required for first load. / Utiliza model-viewer desde CDN; requiere conexión a Internet inicialmente.
+- Built-in prototype articulates doors, bonnet and trunk when HA states change / El prototipo articula puertas, capó y maletero según HA.
+- External GLB articulation remains a future enhancement / La articulación de modelos GLB externos sigue pendiente.
+- Loads Three.js from jsDelivr for the procedural viewer (and Google's model-viewer for external GLB); internet access is needed / Usa Three.js desde jsDelivr para el prototipo (y model-viewer de Google para GLB externos); requiere Internet.
 
 ## Roadmap / Próximos pasos
 
