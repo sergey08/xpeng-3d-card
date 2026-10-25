@@ -1,4 +1,4 @@
-/* XPeng 3D Card — 0.1.0-dev, MIT. Requires a user-provided licensed GLB. */
+/* XPeng 3D Card — 0.2.0-dev, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
  model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380,
  entities:{
@@ -44,12 +44,87 @@ class XPeng3DCard extends HTMLElement {
  <span class="hint">Drag to rotate / Arrastra para girar</span></div>
  <div class="metrics"><span id="battery"></span><span id="charge"></span><span id="power"></span></div>
  <div class="badges" id="badges"></div><div id="message"></div></ha-card>`;
-  const viewer=this.shadowRoot.querySelector('#viewer');viewer.src=String(c.model||DEFAULTS.model);
+  const viewer=this.shadowRoot.querySelector('#viewer');if(c.model && c.model!==DEFAULTS.model){viewer.src=String(c.model);}else{viewer.style.display='none';this.startProcedural();}
   viewer.addEventListener('load',()=>{this.paint();this.animate();});
   viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Supply your own model.'));
-  this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
+  if(c.model && c.model!==DEFAULTS.model) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
  }
+
+ disconnectedCallback(){this._disposed=true;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._resizeObserver?.disconnect();}
+ async startProcedural(){
+  this._disposed=false;
+  try{
+   const T=await import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js');
+   if(this._disposed||!this.shadowRoot)return;
+   const stage=this.shadowRoot.querySelector('.stage');if(!stage)return;
+   const height=Math.max(220,Math.min(700,Number(this.cfg.height)||380));
+   const scene=new T.Scene();scene.background=new T.Color(0xe4e6e8);
+   const camera=new T.PerspectiveCamera(38,1,.1,100);camera.position.set(6,3.2,7.5);camera.lookAt(0,.8,0);
+   const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(stage.clientWidth||340,height);renderer.outputColorSpace=T.SRGBColorSpace;
+   stage.prepend(renderer.domElement);this._renderer=renderer;
+   renderer.domElement.style.cssText='display:block;width:100%;height:'+height+'px;touch-action:none;cursor:grab';
+   const ambient=new T.HemisphereLight(0xffffff,0x8e969c,2.6);scene.add(ambient);
+   const sun=new T.DirectionalLight(0xffffff,2.5);sun.position.set(5,10,6);scene.add(sun);
+   const root=new T.Group();scene.add(root);this._carRoot=root;
+   const paint=new T.MeshStandardMaterial({color:safeColor(this.cfg.color),metalness:.65,roughness:.35});this._paint=paint;
+   const glass=new T.MeshStandardMaterial({color:0x1b2938,metalness:.25,roughness:.12});
+   const dark=new T.MeshStandardMaterial({color:0x24262a,roughness:.8});
+   const silver=new T.MeshStandardMaterial({color:0xb0b9bf,metalness:.85,roughness:.25});
+   const red=new T.MeshStandardMaterial({color:0xb80f20,emissive:0x4d0710});
+   const white=new T.MeshStandardMaterial({color:0xe5eef5,emissive:0x55606e});
+   const addBox=(parent,w,h,d,x,y,z,material)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),material);m.position.set(x,y,z);parent.add(m);return m;};
+   // X forward; model is an intentionally simplified SUV silhouette.
+   addBox(root,4.5,.72,1.92,0,.82,0,paint);
+   addBox(root,2.35,.67,1.7,-.25,1.48,0,glass);
+   addBox(root,2.02,.09,1.76,-.25,1.86,0,paint);
+   addBox(root,1.15,.07,1.72,1.74,1.19,0,paint);
+   addBox(root,.12,.17,1.68,2.26,.90,0,white);
+   addBox(root,.1,.19,1.71,-2.25,.95,0,red);
+   addBox(root,4.55,.18,1.72,0,.49,0,dark);
+   for(const x of [-1.45,1.45])for(const z of [-.98,.98]){
+    const tire=new T.Mesh(new T.CylinderGeometry(.40,.40,.23,28),dark);tire.rotation.x=Math.PI/2;tire.position.set(x,.46,z);root.add(tire);
+    const rim=new T.Mesh(new T.CylinderGeometry(.24,.24,.243,20),silver);rim.rotation.x=Math.PI/2;rim.position.set(x,.46,z);root.add(rim);
+   }
+   this._hinges={};
+   for(const rear of [false,true])for(const side of [-1,1]){
+    const key=(rear?'door_r':'door_f')+(side===-1?'l':'r');
+    const hinge=new T.Group();hinge.position.set(rear?-.95:1.25,.84,side*.96);root.add(hinge);
+    const panel=addBox(hinge,1.12,.65,.065,-.54,0,0,paint);
+    const window=addBox(hinge,.89,.42,.035,-.54,.51,0,glass);
+    addBox(hinge,.17,.045,.10,-.27,.09,side*.055,silver);
+    this._hinges[key]={group:hinge,side,rear};
+   }
+   const hatch=new T.Group();hatch.position.set(-2.22,1.39,0);root.add(hatch);
+   addBox(hatch,.09,.72,1.7,0,-.45,0,paint);
+   addBox(hatch,.10,.40,1.51,-.04,-.02,0,glass);
+   this._hinges.trunk={group:hatch};
+   const bonnet=new T.Group();bonnet.position.set(1.07,1.23,0);root.add(bonnet);addBox(bonnet,1.12,.06,1.73,.56,0,0,paint);this._hinges.bonnet={group:bonnet};
+   const port=addBox(root,.14,.18,.05,-1.50,1.08,-1.0,paint);this._port=port;
+   this.syncProcedural();
+   let az=.62,el=.22,zoom=8,drag=null;
+   renderer.domElement.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];renderer.domElement.setPointerCapture(e.pointerId);});
+   renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;az+=(e.clientX-drag[0])*.008;el=Math.max(-.05,Math.min(.95,el+(e.clientY-drag[1])*.005));drag=[e.clientX,e.clientY];});
+   renderer.domElement.addEventListener('pointerup',()=>drag=null);
+   renderer.domElement.addEventListener('pointercancel',()=>drag=null);
+   renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(4,Math.min(15,zoom+e.deltaY*.008));},{passive:false});
+   this._resizeObserver=new ResizeObserver(()=>{if(!this._renderer)return;let w=stage.clientWidth||340;camera.aspect=w/height;camera.updateProjectionMatrix();renderer.setSize(w,height,false);});this._resizeObserver.observe(stage);
+   const step=()=>{if(this._disposed||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);renderer.render(scene,camera);requestAnimationFrame(step);};step();
+   this.message('3D prototype / Modelo 3D provisional; no es geometría oficial XPeng.');
+  }catch(err){this.message('3D rendering unavailable / Error del visor 3D: '+String(err.message||err));}
+ }
+ syncProcedural(){
+  if(!this._hinges)return;
+  for(const [key,h] of Object.entries(this._hinges)){
+   const v=this.opened(key)?1:0;
+   if(key==='trunk')h.group.rotation.z=v*.85;
+   else if(key==='bonnet')h.group.rotation.z=-v*.55;
+   else h.group.rotation.y=(h.side===-1?1:-1)*v*1.10;
+  }
+  if(this._paint)this._paint.color.set(safeColor(this.cfg.color));
+  if(this._port)this._port.visible=true;
+ }
+
  message(s){const e=this.shadowRoot?.getElementById('message');if(e)e.textContent=s;}
  paint(){
   const model=this.shadowRoot?.getElementById('viewer')?.model;if(!model)return;
