@@ -1,0 +1,65 @@
+name: Publish HACS release / Publicar versión HACS
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic version (example: v0.2.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease / Marcar como preliminar'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $VERSION"; exit 1; }
+          test -s dist/xpeng-3d-card.js
+          node --check dist/xpeng-3d-card.js
+      - name: Build distributable at repository root for HACS
+        run: cp dist/xpeng-3d-card.js xpeng-3d-card.js
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          PRE: ${{ inputs.prerelease }}
+        run: |
+          if gh release view "$VERSION" >/dev/null 2>&1 || git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            echo "Version already exists / La versión ya existe"
+            exit 1
+          fi
+          git tag "$VERSION"
+          git push origin "$VERSION"
+          cat > release-notes.md <<'EOF'
+          ## English
+          - Interactive XPeng-themed 3D SUV prototype with 360° rotation and customizable body color.
+          - Live visual states for four doors, trunk and hood (procedural viewer).
+          - Battery, charging and lock-state indicators.
+          - Developer preview: the geometry is not yet an accurate XPeng G6 model.
+
+          ## Español
+          - Prototipo 3D de SUV inspirado en XPeng, con giro 360° y color personalizable.
+          - Visualización de cuatro puertas, maletero y capó mediante sensores (visor provisional).
+          - Indicadores de batería, carga y bloqueo.
+          - Versión preliminar: todavía no es una reproducción fiel del XPeng G6.
+          EOF
+          if [ "$PRE" = "true" ]; then
+            gh release create "$VERSION" xpeng-3d-card.js --title "$VERSION" --notes-file release-notes.md --prerelease --verify-tag
+          else
+            gh release create "$VERSION" xpeng-3d-card.js --title "$VERSION" --notes-file release-notes.md --verify-tag
+          fi
