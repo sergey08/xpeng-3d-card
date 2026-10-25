@@ -18,7 +18,7 @@ const safeColor=s=>/^#[\da-f]{6}$/i.test(String(s))?s:'#73787d';
 class XPeng3DCard extends HTMLElement {
  static getStubConfig(){return {type:'custom:xpeng-3d-card'};}
  static getConfigElement(){return document.createElement('xpeng-3d-card-editor');}
- setConfig(cfg){this.cfg={...DEFAULTS,...cfg,entities:{...DEFAULTS.entities,...(cfg.entities||{})}};if(!this.shadowRoot)this.attachShadow({mode:'open'});this.render();}
+ setConfig(cfg){this.cleanup();this.cfg={...DEFAULTS,...cfg,entities:{...DEFAULTS.entities,...(cfg.entities||{})}};if(!this.shadowRoot)this.attachShadow({mode:'open'});this.render();}
  set hass(hass){this._hass=hass;this.sync();}
  getCardSize(){return 5;}
  state(key){const id=this.cfg?.entities?.[key];return id?this._hass?.states?.[id]?.state:null;}
@@ -53,12 +53,13 @@ class XPeng3DCard extends HTMLElement {
   const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
  }
 
- disconnectedCallback(){this._disposed=true;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._resizeObserver?.disconnect();}
+ cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;}
+ disconnectedCallback(){this.cleanup();}
  async startProcedural(){
-  this._disposed=false;
+  this._disposed=false;const token=this._renderToken;
   try{
    const T=await import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js');
-   if(this._disposed||!this.shadowRoot)return;
+   if(this._disposed||token!==this._renderToken||!this.shadowRoot)return;
    const stage=this.shadowRoot.querySelector('.stage');if(!stage)return;
    const height=Math.max(220,Math.min(700,Number(this.cfg.height)||380));
    const scene=new T.Scene();scene.background=new T.Color(0xe4e6e8);
@@ -77,11 +78,12 @@ class XPeng3DCard extends HTMLElement {
    const red=new T.MeshStandardMaterial({color:0xb80f20,emissive:0x4d0710});
    const white=new T.MeshStandardMaterial({color:0xe5eef5,emissive:0x55606e});
    const addBox=(parent,w,h,d,x,y,z,material)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),material);m.position.set(x,y,z);parent.add(m);return m;};
-   // X forward; model is an intentionally simplified SUV silhouette.
-   addBox(root,4.5,.72,1.92,0,.82,0,paint);
-   addBox(root,2.35,.67,1.7,-.25,1.48,0,glass);
-   addBox(root,2.02,.09,1.76,-.25,1.86,0,paint);
-   addBox(root,1.15,.07,1.72,1.74,1.19,0,paint);
+   // X forward; stylized geometry, NOT an accurately licensed XPeng mesh.
+   const rounded=(parent,w,h,d,x,y,z,mat,r=.11)=>{const shape=new T.Shape();const a=-w/2,b=-h/2;shape.moveTo(a+r,b);shape.lineTo(a+w-r,b);shape.quadraticCurveTo(a+w,b,a+w,b+r);shape.lineTo(a+w,b+h-r);shape.quadraticCurveTo(a+w,b+h,a+w-r,b+h);shape.lineTo(a+r,b+h);shape.quadraticCurveTo(a,b+h,a,b+h-r);shape.lineTo(a,b+r);shape.quadraticCurveTo(a,b,a+r,b);const g=new T.ExtrudeGeometry(shape,{depth:d-2*r,bevelEnabled:true,bevelThickness:r,bevelSize:r,bevelSegments:3,steps:1,curveSegments:6});g.translate(0,0,-(d-2*r)/2);const m=new T.Mesh(g,mat);m.position.set(x,y,z);parent.add(m);return m;};
+   rounded(root,4.48,.72,1.78,0,.82,0,paint,.12);
+   rounded(root,2.35,.66,1.54,-.25,1.47,0,glass,.10);
+   rounded(root,2.05,.10,1.59,-.28,1.85,0,paint,.04);
+   rounded(root,1.15,.13,1.68,1.72,1.18,0,paint,.045);
    addBox(root,.12,.17,1.68,2.26,.90,0,white);
    // 2025 facelift signature: thin continuous front LED light bar and cleaner nose.
    if(generation==='2025'){
@@ -91,7 +93,7 @@ class XPeng3DCard extends HTMLElement {
     addBox(root,.07,.075,.21,2.32,.93,.72,white);
    }
    addBox(root,.1,.19,1.71,-2.25,.95,0,red);
-   addBox(root,4.55,.18,1.72,0,.49,0,dark);
+   rounded(root,4.44,.20,1.70,0,.50,0,dark,.065);
    for(const x of [-1.45,1.45])for(const z of [-.98,.98]){
     const tire=new T.Mesh(new T.CylinderGeometry(.40,.40,.23,28),dark);tire.rotation.x=Math.PI/2;tire.position.set(x,.46,z);root.add(tire);
     const rim=new T.Mesh(new T.CylinderGeometry(.24,.24,.243,20),silver);rim.rotation.x=Math.PI/2;rim.position.set(x,.46,z);root.add(rim);
@@ -100,7 +102,7 @@ class XPeng3DCard extends HTMLElement {
    for(const rear of [false,true])for(const side of [-1,1]){
     const key=(rear?'door_r':'door_f')+(side===-1?'l':'r');
     const hinge=new T.Group();hinge.position.set(rear?-.95:1.25,.84,side*.96);root.add(hinge);
-    const panel=addBox(hinge,1.12,.65,.065,-.54,0,0,paint);
+    const panel=rounded(hinge,1.12,.65,.065,-.54,0,0,paint,.02);
     if(generation==='2025')addBox(hinge,.92,.055,.071,-.54,.26,0,paint);
     const window=addBox(hinge,.89,.42,.035,-.54,.51,0,glass);
     addBox(hinge,.17,.045,.10,-.27,.09,side*.055,silver);
@@ -124,7 +126,7 @@ class XPeng3DCard extends HTMLElement {
    renderer.domElement.addEventListener('pointercancel',()=>drag=null);
    renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(4,Math.min(15,zoom+e.deltaY*.008));},{passive:false});
    this._resizeObserver=new ResizeObserver(()=>{if(!this._renderer)return;let w=stage.clientWidth||340;camera.aspect=w/height;camera.updateProjectionMatrix();renderer.setSize(w,height,false);});this._resizeObserver.observe(stage);
-   const step=()=>{if(this._disposed||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);renderer.render(scene,camera);requestAnimationFrame(step);};step();
+   const step=()=>{if(this._disposed||token!==this._renderToken||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);renderer.render(scene,camera);requestAnimationFrame(step);};step();
    this.message('G6 '+generation+' concept / Prototipo 3D estilizado, NO es un modelo exacto XPeng.');
   }catch(err){this.message('3D rendering unavailable / Error del visor 3D: '+String(err.message||err));}
  }
@@ -137,7 +139,7 @@ class XPeng3DCard extends HTMLElement {
    else h.group.rotation.y=(h.side===-1?1:-1)*v*1.10;
   }
   if(this._paint)this._paint.color.set(safeColor(this.cfg.color));
-  if(this._port)this._port.visible=true;
+  if(this._port){this._port.material=this.opened('charge_port')?this._portOpenMaterial||(this._portOpenMaterial=new this._port.material.constructor({color:0x161a20})):this._paint;}
  }
 
  message(s){const e=this.shadowRoot?.getElementById('message');if(e)e.textContent=s;}
