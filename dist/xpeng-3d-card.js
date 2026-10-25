@@ -1,4 +1,4 @@
-/* XPeng 3D Card — 0.3.0-dev5, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
+/* XPeng 3D Card — 0.3.1, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
  model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025', model_urls:{},
  entities:{
@@ -50,7 +50,7 @@ class XPeng3DCard extends HTMLElement {
   viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Check the URL and file license.'));
   if(modelUrl) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
-  const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · v0.3.0-dev5';
+  const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · v0.3.1';
  }
 
  cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.forceContextLoss?.();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;this._windows=null;this._chargingCable=null;this._portOpenMaterial?.dispose();this._portOpenMaterial=null;this._materials?.forEach(m=>m.dispose());this._materials=null;this._geometry?.forEach(g=>g.dispose());this._geometry=null;}
@@ -118,18 +118,18 @@ class XPeng3DCard extends HTMLElement {
    addBox(hatch,.10,.40,1.51,-.04,-.02,0,glass);
    this._hinges.trunk={group:hatch};
    const bonnet=new T.Group();bonnet.position.set(1.07,1.23,0);root.add(bonnet);addBox(bonnet,1.12,.06,1.73,.56,0,0,paint);this._hinges.bonnet={group:bonnet};
-   const flap=new T.Group();flap.position.set(-1.50,1.08,-1.05);root.add(flap);const port=addBox(flap,.14,.18,.05,0,0,0,paint);this._port=port;this._portFlap=flap;
+   const flap=new T.Group();flap.position.set(-1.50,1.08,1.05);root.add(flap);const port=addBox(flap,.14,.18,.05,0,0,0,paint);this._port=port;this._portFlap=flap;
    // Visual-only cable. The card never sends commands to the vehicle.
    const cableGroup=new T.Group();root.add(cableGroup);this._chargingCable=cableGroup;
    const cordMat=new T.MeshStandardMaterial({color:0x1e2730,roughness:.65});
    const plugMat=new T.MeshStandardMaterial({color:0x303b47,roughness:.45});
    const glowMat=new T.MeshStandardMaterial({color:0x23b9d6,emissive:0x0789a7,emissiveIntensity:0});
    this._materials.push(cordMat,plugMat,glowMat);this._chargeGlow=glowMat;
-   const points=[new T.Vector3(-1.5,1.08,-1.02),new T.Vector3(-1.5,1.05,-1.28),new T.Vector3(-1.62,.55,-1.67),new T.Vector3(-2.15,.26,-2.02),new T.Vector3(-2.75,.20,-2.25)];
+   const points=[new T.Vector3(-1.5,1.08,1.02),new T.Vector3(-1.5,1.05,1.28),new T.Vector3(-1.62,.55,1.67),new T.Vector3(-2.15,.26,2.02),new T.Vector3(-2.75,.20,2.25)];
    const cg=new T.TubeGeometry(new T.CatmullRomCurve3(points),48,.065,9,false);this._geometry.push(cg);
    cableGroup.add(new T.Mesh(cg,cordMat));
-   addBox(cableGroup,.24,.15,.21,-1.50,1.08,-1.10,plugMat);
-   addBox(cableGroup,.025,.16,.22,-1.51,1.08,-1.13,glowMat);
+   addBox(cableGroup,.24,.15,.21,-1.50,1.08,1.10,plugMat);
+   addBox(cableGroup,.025,.16,.22,-1.51,1.08,1.13,glowMat);
    this.syncProcedural();
    let az=.62,el=.22,zoom=8,drag=null;
    renderer.domElement.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];renderer.domElement.setPointerCapture(e.pointerId);});
