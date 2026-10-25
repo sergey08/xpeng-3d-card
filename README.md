@@ -54,3 +54,17 @@ entities:
 ## License / Licencia
 
 MIT for source code. Vehicle models are **not** licensed by this repository / MIT para el código; no incluye derechos sobre modelos de vehículos.
+
+
+## Releasing / Publicar versiones
+
+Releases are created manually to keep experimental commits separate from HACS releases.
+Las versiones se publican manualmente para no distribuir automáticamente cada cambio de desarrollo.
+
+1. Go to [Actions → Publish HACS release](https://github.com/sergey08/xpeng-3d-card/actions/workflows/publish-release.yml).
+2. Click **Run workflow / Ejecutar flujo de trabajo** on `main`.
+3. Enter a new version, for example `v0.2.0`; keep **prerelease** enabled while experimental.
+4. The workflow validates the JavaScript and creates a GitHub Release containing `xpeng-3d-card.js` as a HACS-downloadable asset.
+5. In HACS, refresh the repository information to detect the release / Actualiza la información del repositorio en HACS.
+
+**Note / Nota:** A workflow file being committed does **not** publish a version by itself.
