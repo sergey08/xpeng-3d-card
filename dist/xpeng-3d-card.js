@@ -1,4 +1,4 @@
-/* XPeng 3D Card — 0.3.1, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
+/* XPeng 3D Card — 0.3.2, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
  model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025', model_urls:{},
  entities:{
@@ -50,7 +50,7 @@ class XPeng3DCard extends HTMLElement {
   viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Check the URL and file license.'));
   if(modelUrl) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
-  const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · v0.3.1';
+  const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · v0.3.2';
  }
 
  cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.forceContextLoss?.();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;this._windows=null;this._chargingCable=null;this._portOpenMaterial?.dispose();this._portOpenMaterial=null;this._materials?.forEach(m=>m.dispose());this._materials=null;this._geometry?.forEach(g=>g.dispose());this._geometry=null;}
@@ -100,10 +100,14 @@ class XPeng3DCard extends HTMLElement {
     const rg=new T.CylinderGeometry(.24,.24,.243,20);this._geometry.push(rg);const rim=new T.Mesh(rg,silver);rim.rotation.x=Math.PI/2;rim.position.set(x,.46,z);root.add(rim);
    }
    this._hinges={};this._windows=[];
+   const recess=new T.MeshStandardMaterial({color:0x080f18,roughness:.9,side:T.DoubleSide});this._materials.push(recess);
    for(const rear of [false,true])for(const side of [-1,1]){
     const key=(rear?'door_r':'door_f')+(side===-1?'l':'r');
-    const hinge=new T.Group();hinge.position.set(rear?-.95:1.25,.84,side*.96);root.add(hinge);
+    addBox(root,1.13,.98,.017,rear?-1.43:.77,1.03,side*.913,recess);
+    const hinge=new T.Group();hinge.position.set(rear?-.90:1.32,.84,side*1.025);root.add(hinge);
     const panel=rounded(hinge,1.12,.65,.065,-.54,0,0,paint,.02);
+    addBox(hinge,1.07,.028,.084,-.54,-.30,side*.017,dark);
+    addBox(hinge,.027,.60,.085,-1.075,0,side*.016,dark);
     if(generation==='2025')addBox(hinge,.92,.055,.071,-.54,.26,0,paint);
     const window=addBox(hinge,.89,.42,.035,-.54,.51,0,glass);this._windows.push(window);
     addBox(hinge,.17,.045,.10,-.27,.09,side*.055,silver);
@@ -147,7 +151,7 @@ class XPeng3DCard extends HTMLElement {
   if(!this._hinges)return;
   for(const [key,h] of Object.entries(this._hinges)){
    const isOpen=this.opened(key);
-   h.target=key==='trunk'?(isOpen?.85:0):key==='bonnet'?(isOpen?-.55:0):(isOpen?(h.side===-1?1:-1)*1.45:0);
+   h.target=key==='trunk'?(isOpen?.85:0):key==='bonnet'?(isOpen?-.55:0):(isOpen?(-h.side)*1.40:0);
   }
   if(this._portFlap)this._portFlapTarget=this.opened('charge_port')?1.15:0;
   if(this._windows){const open=this.opened('windows');for(const w of this._windows)w.visible=!open;}
