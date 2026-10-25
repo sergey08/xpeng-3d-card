@@ -4,7 +4,7 @@ A custom Lovelace **HACS Dashboard** card for XPeng vehicles, with a 3D GLB view
 
 Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, color de carrocería configurable y estados en tiempo real de Home Assistant.
 
-> **0.2.0 Developer preview / Vista preliminar:** A rotatable, recolorable **procedural SUV prototype** is now included, with door/trunk/bonnet state articulation. **This is NOT an exact XPeng G6 model**. An accurate articulated G6 GLB is still a future goal. / Incluye un **prototipo de SUV 3D**, giratorio y recoloreable, con puertas/maletero/capó vinculados a sensores. **No es un modelo exacto del XPeng G6**.
+> **0.3.1 Developer preview / Vista preliminar:** A rotatable, recolorable **procedural SUV prototype** is now included, with door/trunk/bonnet state articulation. **This is NOT an exact XPeng G6 model**. An accurate articulated G6 GLB is still a future goal. / Incluye un **prototipo de SUV 3D**, giratorio y recoloreable, con puertas/maletero/capó vinculados a sensores. **No es un modelo exacto del XPeng G6**.
 
 [![Add to HACS / Añadir a HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sergey08&repository=xpeng-3d-card&category=plugin)
 
@@ -13,7 +13,7 @@ Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, co
 ## Installation / Instalación
 
 1. HACS → Custom repositories / Repositorios personalizados → `https://github.com/sergey08/xpeng-3d-card` → **Dashboard**.
-2. Install / Instalar y actualizar el navegador.
+2. Choose the newest release / Selecciona la versión publicada más reciente e instala; recarga el navegador.
 3. No GLB is required for the built-in procedural prototype / No hace falta GLB para el prototipo incluido. For an external model, set the `model` option / Para un modelo externo usa `model`.
 4. Add a manual Lovelace card / Añade una tarjeta manual:
 
@@ -36,6 +36,16 @@ entities:
   charge_power: sensor.charge_power_xpeng_135818
   battery: sensor.evconduit_battery_level
 ```
+
+## Versions / Versiones
+
+- `v0.3.1` — fixes charging flap/cable placement on the opposite side; displays version in the card. / Corrige el lado de la tapa y del cable de carga; muestra la versión en la tarjeta.
+- `v0.3.0` — live door, boot, bonnet, windows, charge port and plug-in cable on the built-in procedural model. / Estados en vivo de puertas, maletero, capó, ventanas, toma de carga y manguera.
+- `v0.2.0` — initial interactive 3D preview. / Primer prototipo 3D interactivo.
+
+Only GitHub Releases are user-facing HACS versions. Commits on `main` are development builds. / Solo las GitHub Releases son versiones de HACS para usuarios. Los commits de `main` son desarrollo.
+
+See [CHANGELOG.md](CHANGELOG.md) for details / Consulta [CHANGELOG.md](CHANGELOG.md).
 
 ## Current / Estado
 
