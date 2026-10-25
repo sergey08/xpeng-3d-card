@@ -1,6 +1,6 @@
-/* XPeng 3D Card — 0.2.0-dev, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
+/* XPeng 3D Card — 0.3.0-dev, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
- model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380,
+ model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025',
  entities:{
  door_fl:'binary_sensor.driver_door_xpeng_135818',door_fr:'binary_sensor.passenger_door_xpeng_135818',
  door_rl:'binary_sensor.rear_left_door_xpeng_135818',door_rr:'binary_sensor.rear_right_door_xpeng_135818',
@@ -11,6 +11,7 @@ const DEFAULTS = {
  battery:'sensor.evconduit_battery_level'
  }
 };
+const VEHICLES={g6_2025:{label:'XPeng G6 2025 (facelift)',type:'g6',generation:'2025'},g6_2024:{label:'XPeng G6 2024 (prototype)',type:'g6',generation:'2024'}};
 const labels={door_fl:'Front left / Del. izq.',door_fr:'Front right / Del. der.',door_rl:'Rear left / Tras. izq.',door_rr:'Rear right / Tras. der.',trunk:'Trunk / Maletero',bonnet:'Hood / Capó',windows:'Windows / Ventanillas',charge_port:'Charge port / Toma carga'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeColor=s=>/^#[\da-f]{6}$/i.test(String(s))?s:'#73787d';
@@ -39,7 +40,7 @@ class XPeng3DCard extends HTMLElement {
  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.badge{padding:5px 9px;border:1px solid var(--divider-color,#aaa);border-radius:18px;font-size:12px}
  .open{border-color:var(--warning-color,#d80);color:var(--warning-color,#d80)}.metrics{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;font-size:14px}
  .error{color:var(--error-color,#c00);font-size:13px;padding:8px}
- </style><ha-card><header><span>XPeng 3D <small>G6 · dev preview</small></span><span id="lock"></span></header>
+ </style><ha-card><header><span>XPeng 3D <small id="model-label">G6 2025 · dev preview</small></span><span id="lock"></span></header>
  <div class="stage"><model-viewer id="viewer" camera-controls interaction-prompt="none" shadow-intensity=".7" environment-image="neutral" alt="XPeng vehicle"></model-viewer>
  <span class="hint">Drag to rotate / Arrastra para girar</span></div>
  <div class="metrics"><span id="battery"></span><span id="charge"></span><span id="power"></span></div>
@@ -49,6 +50,7 @@ class XPeng3DCard extends HTMLElement {
   viewer.addEventListener('error',()=>this.message('GLB not loaded / No se puede cargar el GLB. Supply your own model.'));
   if(c.model && c.model!==DEFAULTS.model) this.ensureViewer().catch(()=>this.message('3D viewer unavailable / Visor no disponible. Check network/CSP.'));
   this.sync();
+  const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
  }
 
  disconnectedCallback(){this._disposed=true;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._resizeObserver?.disconnect();}
@@ -67,6 +69,7 @@ class XPeng3DCard extends HTMLElement {
    const ambient=new T.HemisphereLight(0xffffff,0x8e969c,2.6);scene.add(ambient);
    const sun=new T.DirectionalLight(0xffffff,2.5);sun.position.set(5,10,6);scene.add(sun);
    const root=new T.Group();scene.add(root);this._carRoot=root;
+   const generation=VEHICLES[this.cfg.vehicle_model]?.generation||'2025';
    const paint=new T.MeshStandardMaterial({color:safeColor(this.cfg.color),metalness:.65,roughness:.35});this._paint=paint;
    const glass=new T.MeshStandardMaterial({color:0x1b2938,metalness:.25,roughness:.12});
    const dark=new T.MeshStandardMaterial({color:0x24262a,roughness:.8});
@@ -80,6 +83,13 @@ class XPeng3DCard extends HTMLElement {
    addBox(root,2.02,.09,1.76,-.25,1.86,0,paint);
    addBox(root,1.15,.07,1.72,1.74,1.19,0,paint);
    addBox(root,.12,.17,1.68,2.26,.90,0,white);
+   // 2025 facelift signature: thin continuous front LED light bar and cleaner nose.
+   if(generation==='2025'){
+    const strip=addBox(root,.06,.035,1.77,2.317,1.165,0,white);
+    addBox(root,.045,.06,1.72,2.319,.82,0,dark);
+    addBox(root,.07,.075,.21,2.32,.93,-.72,white);
+    addBox(root,.07,.075,.21,2.32,.93,.72,white);
+   }
    addBox(root,.1,.19,1.71,-2.25,.95,0,red);
    addBox(root,4.55,.18,1.72,0,.49,0,dark);
    for(const x of [-1.45,1.45])for(const z of [-.98,.98]){
@@ -91,9 +101,14 @@ class XPeng3DCard extends HTMLElement {
     const key=(rear?'door_r':'door_f')+(side===-1?'l':'r');
     const hinge=new T.Group();hinge.position.set(rear?-.95:1.25,.84,side*.96);root.add(hinge);
     const panel=addBox(hinge,1.12,.65,.065,-.54,0,0,paint);
+    if(generation==='2025')addBox(hinge,.92,.055,.071,-.54,.26,0,paint);
     const window=addBox(hinge,.89,.42,.035,-.54,.51,0,glass);
     addBox(hinge,.17,.045,.10,-.27,.09,side*.055,silver);
     this._hinges[key]={group:hinge,side,rear};
+   }
+   if(generation==='2025'){
+     addBox(root,.10,.035,1.6,-2.27,1.55,0,red);
+     addBox(root,1.0,.025,1.62,-1.76,1.82,0,dark);
    }
    const hatch=new T.Group();hatch.position.set(-2.22,1.39,0);root.add(hatch);
    addBox(hatch,.09,.72,1.7,0,-.45,0,paint);
@@ -110,7 +125,7 @@ class XPeng3DCard extends HTMLElement {
    renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(4,Math.min(15,zoom+e.deltaY*.008));},{passive:false});
    this._resizeObserver=new ResizeObserver(()=>{if(!this._renderer)return;let w=stage.clientWidth||340;camera.aspect=w/height;camera.updateProjectionMatrix();renderer.setSize(w,height,false);});this._resizeObserver.observe(stage);
    const step=()=>{if(this._disposed||this._renderer!==renderer)return;camera.position.set(Math.cos(az)*zoom*Math.cos(el),2.0+Math.sin(el)*zoom,Math.sin(az)*zoom*Math.cos(el));camera.lookAt(0,.95,0);renderer.render(scene,camera);requestAnimationFrame(step);};step();
-   this.message('3D prototype / Modelo 3D provisional; no es geometría oficial XPeng.');
+   this.message('G6 '+generation+' concept / Prototipo 3D estilizado, NO es un modelo exacto XPeng.');
   }catch(err){this.message('3D rendering unavailable / Error del visor 3D: '+String(err.message||err));}
  }
  syncProcedural(){
@@ -163,11 +178,13 @@ class XPeng3DCardEditor extends HTMLElement {
  set hass(value){this._hass=value;}
  render(){
   if(!this.shadowRoot)this.attachShadow({mode:'open'});
-  this.shadowRoot.innerHTML=`<style>label{display:block;margin:10px 0;font-size:13px}input{display:block;width:100%;box-sizing:border-box;padding:9px;background:var(--card-background-color);color:var(--primary-text-color);border:1px solid var(--divider-color);border-radius:7px}</style>
+  this.shadowRoot.innerHTML=`<style>label{display:block;margin:10px 0;font-size:13px}input,select{display:block;width:100%;box-sizing:border-box;padding:9px;background:var(--card-background-color);color:var(--primary-text-color);border:1px solid var(--divider-color);border-radius:7px}</style>
+  <label>Vehicle model / Modelo de vehículo<select id="vehicle_model"><option value="g6_2025">XPeng G6 2025</option><option value="g6_2024">XPeng G6 2024 (prototype)</option></select></label>
   <label>3D GLB URL / Ruta del modelo<input id="model" type="text" value="${esc(this.cfg.model||DEFAULTS.model)}"></label>
   <label>Paint color / Color de carrocería<input id="color" type="color" value="${safeColor(this.cfg.color||DEFAULTS.color)}"></label>
   <label>Height / Altura (px)<input id="height" type="number" min="220" max="700" value="${Number(this.cfg.height)||380}"></label>`;
-  for(const el of this.shadowRoot.querySelectorAll('input'))el.addEventListener('change',()=>{
+  this.shadowRoot.getElementById('vehicle_model').value=VEHICLES[this.cfg.vehicle_model]?this.cfg.vehicle_model:'g6_2025';
+  for(const el of this.shadowRoot.querySelectorAll('input,select'))el.addEventListener('change',()=>{
    const value=el.id==='height'?Number(el.value):el.value;
    this.cfg={...this.cfg,[el.id]:value};
    this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:this.cfg},bubbles:true,composed:true}));
@@ -177,4 +194,4 @@ class XPeng3DCardEditor extends HTMLElement {
 if(!customElements.get('xpeng-3d-card'))customElements.define('xpeng-3d-card',XPeng3DCard);
 if(!customElements.get('xpeng-3d-card-editor'))customElements.define('xpeng-3d-card-editor',XPeng3DCardEditor);
 window.customCards=window.customCards||[];
-if(!window.customCards.some(c=>c.type==='xpeng-3d-card'))window.customCards.push({type:'xpeng-3d-card',name:'XPeng 3D Card',description:'Interactive XPeng 3D dashboard card (requires GLB)'});
+if(!window.customCards.some(c=>c.type==='xpeng-3d-card'))window.customCards.push({type:'xpeng-3d-card',name:'XPeng 3D Card',description:'Interactive XPeng 3D dashboard card with selectable vehicle profiles'});
