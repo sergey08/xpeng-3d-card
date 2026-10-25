@@ -19,6 +19,7 @@ Tarjeta personalizada **HACS Dashboard** para coches XPeng, con visor GLB 3D, co
 
 ```yaml
 type: custom:xpeng-3d-card
+vehicle_model: g6_2025
 color: "#73787d"
 height: 380
 entities:
@@ -68,3 +69,14 @@ Las versiones se publican manualmente para no distribuir automáticamente cada c
 5. In HACS, refresh the repository information to detect the release / Actualiza la información del repositorio en HACS.
 
 **Note / Nota:** A workflow file being committed does **not** publish a version by itself.
+
+## Vehicle profiles / Perfiles de vehículos (v0.3.0-dev)
+
+- `g6_2025` (default / predeterminado): G6 2025 facelift-inspired **stylized prototype**, with a thin front light bar. Not accurate manufacturer geometry / prototipo estilizado, no geometría oficial precisa.
+- `g6_2024`: earlier G6-style prototype / prototipo del estilo anterior.
+
+Choose in the visual card editor or YAML with `vehicle_model: g6_2025` / Selecciona en el editor visual o por YAML.
+
+Future models will be added as profiles when suitable licensed articulated geometry is available / Se añadirán más modelos cuando existan geometrías articuladas con licencias adecuadas.
+
+**This development commit is not a tagged HACS release yet / Este cambio de desarrollo aún no es una versión etiquetada de HACS.**
