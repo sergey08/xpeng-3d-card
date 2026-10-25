@@ -6,6 +6,12 @@ All notable changes are recorded here using Semantic Versioning. / Los cambios r
 
 Changes in main are not automatically HACS releases. / Los cambios en main no se publican automáticamente en HACS.
 
+## [0.3.2] - 2026-10-25
+
+### Fixed / Corregido
+- Add contrasting door recesses and exterior door seams to show open states clearly. / Añade huecos oscuros y juntas para distinguir las puertas abiertas.
+- Adjust door pivot and outward swing direction. / Ajusta las bisagras y la dirección de apertura.
+
 ## [0.3.1] - 2026-10-25
 
 ### Fixed / Corregido
