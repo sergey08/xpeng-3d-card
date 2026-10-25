@@ -1,4 +1,4 @@
-/* XPeng 3D Card — 0.3.0-dev, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
+/* XPeng 3D Card — 0.3.0-dev2, MIT. Procedural G6-inspired 3D prototype; not an exact manufacturer model. */
 const DEFAULTS = {
  model:'/local/xpeng-3d-card/xpeng-g6.glb', color:'#73787d', height:380, vehicle_model:'g6_2025',
  entities:{
@@ -53,7 +53,7 @@ class XPeng3DCard extends HTMLElement {
   const label=this.shadowRoot.getElementById('model-label');if(label)label.textContent=(VEHICLES[c.vehicle_model]?.label||VEHICLES.g6_2025.label)+' · 3D preview';
  }
 
- cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;this._portOpenMaterial?.dispose();this._portOpenMaterial=null;}
+ cleanup(){this._disposed=true;this._renderToken=(this._renderToken||0)+1;this._resizeObserver?.disconnect();this._resizeObserver=null;this._renderer?.dispose();this._renderer?.forceContextLoss?.();this._renderer?.domElement?.remove();this._renderer=null;this._hinges=null;this._paint=null;this._carRoot=null;this._portOpenMaterial?.dispose();this._portOpenMaterial=null;this._materials?.forEach(m=>m.dispose());this._materials=null;this._geometry?.forEach(g=>g.dispose());this._geometry=null;}
  disconnectedCallback(){this.cleanup();}
  async startProcedural(){
   this._disposed=false;const token=this._renderToken;
@@ -77,9 +77,10 @@ class XPeng3DCard extends HTMLElement {
    const silver=new T.MeshStandardMaterial({color:0xb0b9bf,metalness:.85,roughness:.25});
    const red=new T.MeshStandardMaterial({color:0xb80f20,emissive:0x4d0710});
    const white=new T.MeshStandardMaterial({color:0xe5eef5,emissive:0x55606e});
-   const addBox=(parent,w,h,d,x,y,z,material)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),material);m.position.set(x,y,z);parent.add(m);return m;};
+   const addBox=(parent,w,h,d,x,y,z,material)=>{const g=new T.BoxGeometry(w,h,d);this._geometry.push(g);const m=new T.Mesh(g,material);m.position.set(x,y,z);parent.add(m);return m;};
+   this._materials=[paint,glass,dark,silver,red,white];this._geometry=[];
    // X forward; stylized geometry, NOT an accurately licensed XPeng mesh.
-   const rounded=(parent,w,h,d,x,y,z,mat,r=.11)=>{const shape=new T.Shape();const a=-w/2,b=-h/2;shape.moveTo(a+r,b);shape.lineTo(a+w-r,b);shape.quadraticCurveTo(a+w,b,a+w,b+r);shape.lineTo(a+w,b+h-r);shape.quadraticCurveTo(a+w,b+h,a+w-r,b+h);shape.lineTo(a+r,b+h);shape.quadraticCurveTo(a,b+h,a,b+h-r);shape.lineTo(a,b+r);shape.quadraticCurveTo(a,b,a+r,b);const g=new T.ExtrudeGeometry(shape,{depth:d-2*r,bevelEnabled:true,bevelThickness:r,bevelSize:r,bevelSegments:3,steps:1,curveSegments:6});g.translate(0,0,-(d-2*r)/2);const m=new T.Mesh(g,mat);m.position.set(x,y,z);parent.add(m);return m;};
+   const rounded=(parent,w,h,d,x,y,z,mat,r=.11)=>{const shape=new T.Shape();const a=-w/2,b=-h/2;shape.moveTo(a+r,b);shape.lineTo(a+w-r,b);shape.quadraticCurveTo(a+w,b,a+w,b+r);shape.lineTo(a+w,b+h-r);shape.quadraticCurveTo(a+w,b+h,a+w-r,b+h);shape.lineTo(a+r,b+h);shape.quadraticCurveTo(a,b+h,a,b+h-r);shape.lineTo(a,b+r);shape.quadraticCurveTo(a,b,a+r,b);const g=new T.ExtrudeGeometry(shape,{depth:d-2*r,bevelEnabled:true,bevelThickness:r,bevelSize:r,bevelSegments:3,steps:1,curveSegments:6});g.translate(0,0,-(d-2*r)/2);this._geometry.push(g);const m=new T.Mesh(g,mat);m.position.set(x,y,z);parent.add(m);return m;};
    rounded(root,4.48,.72,1.78,0,.82,0,paint,.12);
    rounded(root,2.35,.66,1.54,-.25,1.47,0,glass,.10);
    rounded(root,2.05,.10,1.59,-.28,1.85,0,paint,.04);
@@ -95,8 +96,8 @@ class XPeng3DCard extends HTMLElement {
    addBox(root,.1,.19,1.71,-2.25,.95,0,red);
    rounded(root,4.44,.20,1.70,0,.50,0,dark,.065);
    for(const x of [-1.45,1.45])for(const z of [-.98,.98]){
-    const tire=new T.Mesh(new T.CylinderGeometry(.40,.40,.23,28),dark);tire.rotation.x=Math.PI/2;tire.position.set(x,.46,z);root.add(tire);
-    const rim=new T.Mesh(new T.CylinderGeometry(.24,.24,.243,20),silver);rim.rotation.x=Math.PI/2;rim.position.set(x,.46,z);root.add(rim);
+    const tg=new T.CylinderGeometry(.40,.40,.23,28);this._geometry.push(tg);const tire=new T.Mesh(tg,dark);tire.rotation.x=Math.PI/2;tire.position.set(x,.46,z);root.add(tire);
+    const rg=new T.CylinderGeometry(.24,.24,.243,20);this._geometry.push(rg);const rim=new T.Mesh(rg,silver);rim.rotation.x=Math.PI/2;rim.position.set(x,.46,z);root.add(rim);
    }
    this._hinges={};
    for(const rear of [false,true])for(const side of [-1,1]){
