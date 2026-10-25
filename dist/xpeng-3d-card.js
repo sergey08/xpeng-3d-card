@@ -155,6 +155,7 @@ class XPeng3DCard extends HTMLElement {
    }
    if(this.opened('plugged')){const el=document.createElement('span');el.className='badge open';el.textContent='🔌 Plugged in / Conectado';badges.appendChild(el);}
   }
+  this.syncProcedural();
  }
 }
 class XPeng3DCardEditor extends HTMLElement {
